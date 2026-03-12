@@ -26,6 +26,8 @@ ticket-classification-bilstm/
 └── README.md
 
 > ⚠️ **Note:** The trained model file (`bilstm_attention_ticket_classifier.keras`) is not included in this repo due to file size limits. To get the model, run the notebooks in order — `Preprocessing.ipynb` first, then `Model_trian_diff_categories_tickets.ipynb`. The model will be saved locally.
+>
+> https://drive.google.com/file/d/1KtZErsJ60C_STEIg5TXL9DbbUVYXE1tv/view?usp=drive_link
 
 Model Architecture
 Input (seq length: 500)
