@@ -16,18 +16,19 @@ Billing / Finance
 Stores the ticket and routes it to the correct MongoDB collection automatically
 
 
-Project Structure
-ticket-classification-bilstm/
-│
-├── Preprocessing.ipynb                  # Data loading, label mapping, multilingual translation
-├── Model_trian_diff_categories_tickets.ipynb    # BiLSTM + Attention model training
-├── main.py                              # MongoDB CRUD backend + inference pipeline
-├── tokenizer.pkl                        # Saved Keras tokenizer
-└── README.md
+Download Trained Model
+The trained model file is too large for GitHub. Download it here:
+🔗 Download bilstm_attention_ticket_classifier.keras (Google Drive)
+After downloading, place the file in the same directory as main.py before running the backend.
 
-> ⚠️ **Note:** The trained model file (`bilstm_attention_ticket_classifier.keras`) is not included in this repo due to file size limits. To get the model, run the notebooks in order — `Preprocessing.ipynb` first, then `Model_trian_diff_categories_tickets.ipynb`. The model will be saved locally.
->
-> https://drive.google.com/file/d/1KtZErsJ60C_STEIg5TXL9DbbUVYXE1tv/view?usp=drive_link
+Project Structure
+Ticket-classification-bilstm-attention/
+│
+├── Preprocessing.ipynb                       # Data loading, label mapping, multilingual translation
+├── Model_trian_diff_categories_tickets.ipynb # BiLSTM + Attention model training
+├── main.py                                   # MongoDB CRUD backend + inference pipeline
+├── tokenizer.pkl                             # Saved Keras tokenizer
+└── README.md
 
 Model Architecture
 Input (seq length: 500)
@@ -65,19 +66,21 @@ On ticket update — old departmental record deleted, new prediction run, re-rou
 On delete — ticket removed from all collections
 
 
-Tech Stack
-CategoryToolsLanguagePythonDeep LearningTensorFlow / KerasNLPKeras Tokenizer, Sequence PaddingTranslationHuggingFace Transformers (MarianMT)DataHuggingFace Datasets, Pandas, NumPyDatabaseMongoDB, PyMongoSerialisationPickle (.pkl), Keras (.keras)
-
 How to Run
 1. Install dependencies
 bashpip install tensorflow pymongo transformers datasets pandas numpy
-2. Preprocess data
-Run Preprocessing.ipynb — this loads the dataset, translates German tickets, maps labels, and saves the processed CSV.
-3. Train the model
-Run Model_train_diff_categories.ipynb — this tokenises text, builds and trains the BiLSTM+Attention model, and saves bilstm_attention_ticket_classifier.keras and tokenizer.pkl.
-4. Run the backend
+2. Download the trained model
+Download bilstm_attention_ticket_classifier.keras from the link above and place it in the project directory.
+3. Preprocess data (optional — only if retraining)
+Run Preprocessing.ipynb — loads the dataset, translates German tickets, maps labels, saves processed CSV.
+4. Train the model (optional — only if retraining)
+Run Model_trian_diff_categories_tickets.ipynb — tokenises text, trains the BiLSTM+Attention model, saves .keras and tokenizer.pkl.
+5. Run the backend
 bashpython main.py
 Make sure MongoDB is running locally on mongodb://localhost:27017/.
+
+Tech Stack
+CategoryToolsLanguagePythonDeep LearningTensorFlow / KerasNLPKeras Tokenizer, Sequence PaddingTranslationHuggingFace Transformers (MarianMT)DataHuggingFace Datasets, Pandas, NumPyDatabaseMongoDB, PyMongoSerialisationPickle (.pkl), Keras (.keras)
 
 Author
 Ayush Anand
