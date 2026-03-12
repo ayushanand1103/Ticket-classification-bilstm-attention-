@@ -1,6 +1,7 @@
 Ticket Classification System — BiLSTM + Attention
 An end-to-end NLP system that automatically classifies customer support tickets into departments using a Bidirectional LSTM with Attention mechanism, backed by a MongoDB database for full ticket lifecycle management.
 
+
 What It Does
 When a user submits a support ticket, the system:
 
@@ -15,10 +16,9 @@ Billing / Finance
 
 Stores the ticket and routes it to the correct MongoDB collection automatically
 
-
 Download Trained Model
 The trained model file is too large for GitHub. Download it here:
-🔗 Download bilstm_attention_ticket_classifier.keras (Google Drive)
+https://drive.google.com/file/d/1KtZErsJ60C_STEIg5TXL9DbbUVYXE1tv/view?usp=drive_link
 After downloading, place the file in the same directory as main.py before running the backend.
 
 Project Structure
@@ -38,12 +38,10 @@ Input (seq length: 500)
     → GlobalAveragePooling1D
     → Dropout (0.5)
     → Dense (3 units, softmax)
-
 Loss: Sparse Categorical Cross-Entropy
 Optimizer: Adam
 Training: EarlyStopping on val_loss (patience=3), batch size 64, up to 10 epochs
 Train/Val split: 90/10
-
 
 Dataset & Preprocessing
 
@@ -54,17 +52,16 @@ Multilingual handling: German tickets were translated to English using Helsinki-
 "General Inquiry" tickets were dropped (ambiguous label)
 Labels: IT/Tech → 0, Customer Service → 1, Billing/Finance → 2
 
-
 Database (MongoDB + PyMongo)
 The main.py backend implements a multi-collection MongoDB architecture:
 CollectionPurposeUser_infoMaster collection — stores all ticket data with user detailsIT_TechRouted IT/Technical ticketsCustomer_serviceRouted Customer Service ticketsBilling_financeRouted Billing/Finance tickets
+
 Features:
 
 JSON Schema validation ($jsonSchema) enforced at database level
 Full CRUD: insert, read (name/email/phone/ticket/status/department), update, delete
 On ticket update — old departmental record deleted, new prediction run, re-routed automatically
 On delete — ticket removed from all collections
-
 
 How to Run
 1. Install dependencies
@@ -81,6 +78,7 @@ Make sure MongoDB is running locally on mongodb://localhost:27017/.
 
 Tech Stack
 CategoryToolsLanguagePythonDeep LearningTensorFlow / KerasNLPKeras Tokenizer, Sequence PaddingTranslationHuggingFace Transformers (MarianMT)DataHuggingFace Datasets, Pandas, NumPyDatabaseMongoDB, PyMongoSerialisationPickle (.pkl), Keras (.keras)
+
 
 Author
 Ayush Anand
