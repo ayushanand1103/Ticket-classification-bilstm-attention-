@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ticketing System</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: #08090b;
+      color: #c8cad0;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .container { width: 100%; max-width: 680px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; background: #0e0f11;
+      border: 1px solid #1f2229; border-radius: 8px 8px 0 0; border-bottom: none;
+    }
+    .logo {
+      font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+      color: #e2e4ea; letter-spacing: 0.08em; display: flex; align-items: center; gap: 10px;
+    }
+    .live-dot { width:8px; height:8px; border-radius:50%; background:#4ade80; animation:blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .tags { display: flex; gap: 6px; }
+    .tag { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.08em; padding:3px 8px; border-radius:2px; }
+    .tag-green { background:#14532d; color:#4ade80; }
+    .tag-blue  { background:#1e3a5f; color:#60a5fa; }
+    .tag-amber { background:#451a03; color:#fbbf24; }
+    .tabs {
+      display: flex; background: #0a0b0d;
+      border-left:1px solid #1f2229; border-right:1px solid #1f2229; border-bottom:1px solid #1f2229;
+    }
+    .tab {
+      flex:1; padding:11px 0; font-family:'IBM Plex Mono',monospace; font-size:11px;
+      letter-spacing:0.05em; color:#555a66; cursor:pointer; border:none;
+      border-bottom:2px solid transparent; background:transparent; transition:all 0.15s;
+    }
+    .tab:hover { color:#9ba0ad; background:#0e0f11; }
+    .tab.active { color:#e2e4ea; border-bottom-color:#4ade80; background:#0e0f11; }
+    .panel {
+      display:none; padding:24px 20px; background:#0e0f11;
+      border:1px solid #1f2229; border-top:none; border-radius:0 0 8px 8px;
+      animation:fadein 0.15s ease;
+    }
+    .panel.active { display:block; }
+    @keyframes fadein { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    .section-label {
+      font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.12em;
+      color:#3a3f4a; text-transform:uppercase; margin-bottom:14px;
+    }
+    .field { margin-bottom:14px; }
+    .field label {
+      display:block; font-size:11px; color:#555a66; margin-bottom:5px;
+      font-family:'IBM Plex Mono',monospace; letter-spacing:0.05em;
+    }
+    .input, .textarea, .select {
+      width:100%; background:#13151a; border:1px solid #1f2229; border-radius:4px;
+      padding:9px 13px; font-size:13px; color:#c8cad0; font-family:'IBM Plex Sans',sans-serif;
+      outline:none; transition:border-color 0.15s;
+    }
+    .input:focus, .textarea:focus, .select:focus { border-color:#4ade80; }
+    .input::placeholder, .textarea::placeholder { color:#2e333d; }
+    .textarea { resize:vertical; min-height:100px; }
+    .select { cursor:pointer; }
+    .select option { background:#13151a; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .btn {
+      font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.06em;
+      padding:9px 18px; border-radius:4px; cursor:pointer; transition:all 0.15s; border:1px solid;
+    }
+    .btn-primary { background:#4ade80; color:#0a0b0d; border-color:#4ade80; font-weight:500; }
+    .btn-primary:hover { background:#6ee89a; border-color:#6ee89a; }
+    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+    .btn-ghost { background:transparent; color:#9ba0ad; border-color:#1f2229; }
+    .btn-ghost:hover { border-color:#4ade80; color:#4ade80; }
+    .btn-danger { background:transparent; color:#f87171; border-color:#2d1f1f; }
+    .btn-danger:hover { background:#2d1f1f; }
+    .btn-danger:disabled { opacity:0.5; cursor:not-allowed; }
+    .result {
+      margin-top:16px; background:#13151a; border:1px solid #1f2229; border-radius:4px;
+      padding:12px 14px; font-size:12px; line-height:1.7; font-family:'IBM Plex Mono',monospace;
+      color:#9ba0ad; white-space:pre-wrap; display:none;
+    }
+    .result.show    { display:block; }
+    .result.success { border-color:#14532d; color:#4ade80; }
+    .result.error   { border-color:#4a1a1a; color:#f87171; }
+    .result.info    { border-color:#1e3a5f; color:#60a5fa; }
+    .id-bar { display:flex; gap:8px; margin-bottom:16px; }
+    .id-bar .input { flex:1; }
+    .read-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+    .read-btn {
+      background:#13151a; border:1px solid #1f2229; border-radius:4px; padding:10px 13px;
+      font-size:11px; color:#9ba0ad; cursor:pointer; font-family:'IBM Plex Mono',monospace;
+      letter-spacing:0.05em; transition:all 0.15s; text-align:left;
+    }
+    .read-btn:hover { border-color:#4ade80; color:#4ade80; }
+    .read-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .action-bar {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-top:18px; padding-top:16px; border-top:1px solid #1a1c22;
+    }
+    .action-bar .hint { font-size:11px; color:#3a3f4a; font-family:'IBM Plex Mono',monospace; }
+    .warning-box { background:#1a0f0f; border:1px solid #3d1515; border-radius:4px; padding:14px 16px; margin-top:8px; }
+    .warning-box .warn-title { font-size:11px; font-family:'IBM Plex Mono',monospace; color:#f87171; margin-bottom:5px; }
+    .warning-box .warn-body  { font-size:12px; color:#7a5555; line-height:1.5; }
+    .dept-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:12px; }
+    .dept-row .hint { font-size:11px; color:#3a3f4a; font-family:'IBM Plex Mono',monospace; margin-right:2px; }
+    .spinner {
+      display:inline-block; width:10px; height:10px;
+      border:1px solid #4ade8040; border-top-color:#4ade80;
+      border-radius:50%; animation:spin 0.6s linear infinite;
+      margin-right:6px; vertical-align:middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="topbar">
+    <div class="logo"><div class="live-dot"></div>TICKET_SYS &nbsp;v1.0</div>
+    <div class="tags">
+      <span class="tag tag-green">ONLINE</span>
+      <span class="tag tag-blue">ML ACTIVE</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('raise',this)">// raise</button>
+    <button class="tab" onclick="switchTab('lookup',this)">// lookup</button>
+    <button class="tab" onclick="switchTab('update',this)">// update</button>
+    <button class="tab" onclick="switchTab('delete',this)">// delete</button>
+  </div>
+
+  <!-- RAISE -->
+  <div class="panel active" id="tab-raise">
+    <div class="section-label">new ticket submission</div>
+    <div class="row">
+      <div class="field"><label>full_name</label><input class="input" id="r-name" placeholder="John Doe"/></div>
+      <div class="field"><label>email_address</label><input class="input" id="r-email" type="email" placeholder="john@example.com"/></div>
+    </div>
+    <div class="field"><label>phone_number</label><input class="input" id="r-phone" placeholder="+91 98765 43210"/></div>
+    <div class="field"><label>ticket_description</label><textarea class="textarea" id="r-ticket" placeholder="Describe your issue in detail..."></textarea></div>
+    <div class="dept-row">
+      <span class="hint">auto-routes to →</span>
+      <span class="tag tag-blue">IT / Tech</span>
+      <span class="tag tag-amber">Billing / Finance</span>
+      <span class="tag tag-green">Customer Service</span>
+    </div>
+    <div class="action-bar">
+      <span class="hint">department assigned by ML model</span>
+      <button class="btn btn-primary" id="raise-btn" onclick="raiseTicket()">submit_ticket →</button>
+    </div>
+    <div class="result" id="raise-result"></div>
+  </div>
+
+  <!-- LOOKUP -->
+  <div class="panel" id="tab-lookup">
+    <div class="section-label">ticket lookup</div>
+    <div class="id-bar">
+      <input class="input" id="l-id" placeholder="ticket_id — 24-char MongoDB ObjectId"/>
+      <button class="btn btn-ghost" onclick="clearBox('l-id','lookup-result')">clear</button>
+    </div>
+    <div class="section-label">select field to fetch</div>
+    <div class="read-grid">
+      <button class="read-btn" onclick="lookup('name')">→ name</button>
+      <button class="read-btn" onclick="lookup('email')">→ email</button>
+      <button class="read-btn" onclick="lookup('phone')">→ phone number</button>
+      <button class="read-btn" onclick="lookup('ticket')">→ ticket text</button>
+      <button class="read-btn" onclick="lookup('status')">→ status</button>
+      <button class="read-btn" onclick="lookup('department')">→ department</button>
+    </div>
+    <div class="result" id="lookup-result"></div>
+  </div>
+
+  <!-- UPDATE -->
+  <div class="panel" id="tab-update">
+    <div class="section-label">update ticket field</div>
+    <div class="field"><label>ticket_id</label><input class="input" id="u-id" placeholder="24-char MongoDB ObjectId"/></div>
+    <div class="field">
+      <label>field_to_update</label>
+      <select class="select" id="u-field" onchange="toggleUpdateField()">
+        <option value="">-- select field --</option>
+        <option value="name">name</option>
+        <option value="email">email</option>
+        <option value="phone">phone number</option>
+        <option value="ticket">ticket description  (re-runs ML routing)</option>
+      </select>
+    </div>
+    <div class="field" id="u-value-wrap" style="display:none;">
+      <label id="u-value-label">new_value</label>
+      <input class="input" id="u-value" placeholder=""/>
+    </div>
+    <div class="action-bar">
+      <span class="hint">updating ticket re-runs ML classification</span>
+      <button class="btn btn-primary" id="update-btn" onclick="updateTicket()">apply_update →</button>
+    </div>
+    <div class="result" id="update-result"></div>
+  </div>
+
+  <!-- DELETE -->
+  <div class="panel" id="tab-delete">
+    <div class="section-label">delete ticket</div>
+    <div class="field"><label>ticket_id</label><input class="input" id="d-id" placeholder="24-char MongoDB ObjectId"/></div>
+    <div class="warning-box">
+      <div class="warn-title">!! WARNING</div>
+      <div class="warn-body">Permanently removes the ticket from all collections: User_info, IT_Tech, Customer_service, Billing_finance. This cannot be undone.</div>
+    </div>
+    <div class="action-bar">
+      <button class="btn btn-ghost" onclick="clearBox('d-id','delete-result')">cancel</button>
+      <button class="btn btn-danger" id="delete-btn" onclick="deleteTicket()">confirm_delete</button>
+    </div>
+    <div class="result" id="delete-result"></div>
+  </div>
+
+</div>
+<script>
+  /* ─── Point this at your Flask server ─── */
+  const API = "http://localhost:5000";
+
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function showResult(id, msg, type) {
+    const el = document.getElementById(id);
+    el.className = 'result show ' + type;
+    el.innerHTML = msg;
+  }
+
+  function setLoading(id, msg) {
+    const el = document.getElementById(id);
+    el.className = 'result show info';
+    el.innerHTML = '<span class="spinner"></span>' + msg;
+  }
+
+  function clearBox(inputId, resultId) {
+    document.getElementById(inputId).value = '';
+    const r = document.getElementById(resultId);
+    r.className = 'result'; r.innerHTML = '';
+  }
+
+  function setBtn(id, disabled) { document.getElementById(id).disabled = disabled; }
+  function validId(id) { return /^[a-f\d]{24}$/i.test(id); }
+
+  /* ── RAISE ── */
+  async function raiseTicket() {
+    const name   = document.getElementById('r-name').value.trim();
+    const email  = document.getElementById('r-email').value.trim();
+    const phone  = document.getElementById('r-phone').value.trim();
+    const ticket = document.getElementById('r-ticket').value.trim();
+    if (!name || !email || !phone || !ticket) {
+      showResult('raise-result', 'ERROR: all fields are required', 'error'); return;
+    }
+    setBtn('raise-btn', true);
+    setLoading('raise-result', 'Submitting ticket...');
+    try {
+      const res  = await fetch(`${API}/raise`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, ticket })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showResult('raise-result',
+          '✓ ' + data.message + '\n\n' +
+          '  TICKET ID  : ' + data.ticket_id + '\n' +
+          '  department : ' + data.department + '\n' +
+          '  name       : ' + name + '\n' +
+          '  email      : ' + email + '\n\n' +
+          '  ↑ Save your Ticket ID to look up,\n' +
+          '    update, or delete this ticket.', 'success');
+        ['r-name','r-email','r-phone','r-ticket'].forEach(i => document.getElementById(i).value = '');
+      } else {
+        showResult('raise-result', 'ERROR: ' + data.error, 'error');
+      }
+    } catch(e) {
+      showResult('raise-result', 'ERROR: could not reach backend\nIs app.py running at ' + API + ' ?', 'error');
+    }
+    setBtn('raise-btn', false);
+  }
+
+  /* ── LOOKUP ── */
+  async function lookup(field) {
+    const id = document.getElementById('l-id').value.trim();
+    if (!id)          { showResult('lookup-result', 'ERROR: enter a ticket ID', 'error'); return; }
+    if (!validId(id)) { showResult('lookup-result', 'ERROR: invalid ID — must be 24 hex chars', 'error'); return; }
+    setLoading('lookup-result', 'Fetching ' + field + '...');
+    try {
+      const res  = await fetch(`${API}/ticket/${id}/${field}`);
+      const data = await res.json();
+      if (res.ok) showResult('lookup-result', '[' + field.toUpperCase() + ']\n' + data.value, 'info');
+      else        showResult('lookup-result', 'ERROR: ' + data.error, 'error');
+    } catch(e) {
+      showResult('lookup-result', 'ERROR: could not reach backend\nIs app.py running at ' + API + ' ?', 'error');
+    }
+  }
+
+  /* ── UPDATE ── */
+  function toggleUpdateField() {
+    const f = document.getElementById('u-field').value;
+    const wrap = document.getElementById('u-value-wrap');
+    const lbl  = document.getElementById('u-value-label');
+    const inp  = document.getElementById('u-value');
+    if (!f) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    lbl.textContent = 'new_' + f.replace(' ','_');
+    inp.placeholder = f === 'ticket' ? 'Updated ticket description...' : 'New value';
+    inp.focus();
+  }
+
+  async function updateTicket() {
+    const id    = document.getElementById('u-id').value.trim();
+    const field = document.getElementById('u-field').value;
+    const val   = document.getElementById('u-value').value.trim();
+    if (!id)          { showResult('update-result', 'ERROR: ticket ID is required', 'error'); return; }
+    if (!validId(id)) { showResult('update-result', 'ERROR: invalid ID — must be 24 hex chars', 'error'); return; }
+    if (!field)       { showResult('update-result', 'ERROR: select a field to update', 'error'); return; }
+    if (!val)         { showResult('update-result', 'ERROR: new value cannot be empty', 'error'); return; }
+    setBtn('update-btn', true);
+    setLoading('update-result', 'Updating ' + field + '...');
+    try {
+      const res  = await fetch(`${API}/update`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, field, value: val })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const note = field === 'ticket' ? '\n  ML re-classification triggered' : '';
+        showResult('update-result', '✓ ' + data.message + note, 'success');
+      } else {
+        showResult('update-result', 'ERROR: ' + data.error, 'error');
+      }
+    } catch(e) {
+      showResult('update-result', 'ERROR: could not reach backend\nIs app.py running at ' + API + ' ?', 'error');
+    }
+    setBtn('update-btn', false);
+  }
+
+  /* ── DELETE ── */
+  async function deleteTicket() {
+    const id = document.getElementById('d-id').value.trim();
+    if (!id)          { showResult('delete-result', 'ERROR: enter a ticket ID', 'error'); return; }
+    if (!validId(id)) { showResult('delete-result', 'ERROR: invalid ID — must be 24 hex chars', 'error'); return; }
+    setBtn('delete-btn', true);
+    setLoading('delete-result', 'Deleting ticket...');
+    try {
+      const res  = await fetch(`${API}/delete/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        showResult('delete-result',
+          '✓ ' + data.message + '\n  removed from: User_info, IT_Tech,\n                Customer_service, Billing_finance',
+          'success');
+        document.getElementById('d-id').value = '';
+      } else {
+        showResult('delete-result', 'ERROR: ' + data.error, 'error');
+      }
+    } catch(e) {
+      showResult('delete-result', 'ERROR: could not reach backend\nIs app.py running at ' + API + ' ?', 'error');
+    }
+    setBtn('delete-btn', false);
+  }
+</script>
+</body>
+</html>
