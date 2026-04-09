@@ -524,4 +524,3 @@ class User:
         except PyMongoError:
             return "Database error"
 
-User.insert("Ayush","ayushanand.1103@gmail.com","9717765187","I attempted to complete a payment for my subscription on [date], but the transaction failed while the amount was still deducted from my bank account. The payment status shows unsuccessful on the portal, however, the amount has been debited.Kindly verify the transaction and confirm whether the payment was successful or initiate a refund at the earliest.")
